@@ -5,9 +5,18 @@ import Link from 'next/link';
 // This function tells Next.js which slugs to pre-render at build time
 export async function generateStaticParams() {
   const tools = getSortedToolsData();
-  return tools.map((tool) => ({
-    slug: tool.slug,
-  }));
+  
+  const validParams = tools
+    .map((tool) => {
+      if (tool && typeof tool.slug === 'string' && tool.slug) {
+        return { slug: tool.slug };
+      }
+      // Explicitly return null for any invalid/unexpected entries
+      return null;
+    })
+    .filter((param): param is { slug: string } => param !== null); // Strictly filter out all nulls
+
+  return validParams;
 }
 
 // This function sets the page title
