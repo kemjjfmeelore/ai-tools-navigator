@@ -17,28 +17,29 @@ export interface ToolData {
 }
 
 export function getSortedToolsData(): ToolData[] {
-  // Get file names under /src/tools
   const fileNames = fs.readdirSync(toolsDirectory);
-  const allToolsData = fileNames.map((fileName) => {
-    // Remove ".mdx" from file name to get slug
-    const slug = fileName.replace(/\.mdx$/, '');
+  const allToolsData = fileNames
+    .filter((fileName) => fileName.endsWith('.mdx')) // 1. Ensure we only process .mdx files
+    .map((fileName) => {
+      // 2. The slug is reliably derived from the filename
+      const slug = fileName.replace(/\.mdx$/, '');
 
-    // Read markdown file as string
-    const fullPath = path.join(toolsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
+      const fullPath = path.join(toolsDirectory, fileName);
+      const fileContents = fs.readFileSync(fullPath, 'utf8');
+      const matterResult = matter(fileContents);
 
-    // Use gray-matter to parse the post metadata section
-    const matterResult = matter(fileContents);
-
-    // Combine the data with the slug and assert the type
-    return {
-      slug,
-      ...matterResult.data,
-    } as ToolData;
-  });
+      // 3. The slug from the filename is the single source of truth
+      return {
+        ...matterResult.data,
+        slug,
+      } as ToolData;
+    });
 
   // Sort tools by name
   return allToolsData.sort((a, b) => {
+    // A quick check to prevent error if name is missing in frontmatter
+    if (!a.name || !b.name) return 0;
+    
     if (a.name < b.name) {
       return -1;
     } else {
@@ -47,17 +48,18 @@ export function getSortedToolsData(): ToolData[] {
   });
 }
 
-export async function getToolData(slug: string): Promise<ToolData & { content: string }> {
+export async function getToolData(
+  slug: string
+): Promise<ToolData & { content: string }> {
   const fullPath = path.join(toolsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
 
-  // Use gray-matter to parse the post metadata section
   const matterResult = matter(fileContents);
 
-  // Combine the data with the slug and content
+  // The slug from the URL parameter is the single source of truth
   return {
+    ...matterResult.data,
     slug,
     content: matterResult.content,
-    ...matterResult.data,
   } as ToolData & { content: string };
 }
