@@ -30,11 +30,11 @@ export function getSortedToolsData(): ToolData[] {
     // Use gray-matter to parse the post metadata section
     const matterResult = matter(fileContents);
 
-    // Combine the data with the slug
+    // Combine the data with the slug and assert the type
     return {
       slug,
-      ...(matterResult.data as Omit<ToolData, 'slug'>),
-    };
+      ...matterResult.data,
+    } as ToolData;
   });
 
   // Sort tools by name
