@@ -13,7 +13,7 @@ export default function Home() {
           {allToolsData.map((tool) => (
             <div key={tool.slug} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow group relative">
               {/* Internal link to detail page - covers the main card area */}
-              <Link href={\`/tool/${tool.slug}\`} className="absolute inset-0 z-10" aria-label={\`查看 ${tool.name} 详情\`}></Link>
+              <Link href={`/tool/${tool.slug}`} className="absolute inset-0 z-10" aria-label={`查看 ${tool.name} 详情`}></Link>
               
               <h2 className="text-2xl font-semibold mb-2 group-hover:text-blue-500 transition-colors">{tool.name}</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
