@@ -19,21 +19,41 @@ export interface ToolData {
 export function getSortedToolsData(): ToolData[] {
   const fileNames = fs.readdirSync(toolsDirectory);
   const allToolsData = fileNames
-    .filter((fileName) => fileName.endsWith('.mdx')) // 1. Ensure we only process .mdx files
     .map((fileName) => {
-      // 2. The slug is reliably derived from the filename
+      // --- DEBUGGING LOGS START ---
+      console.log('[DEBUG] Processing file:', fileName);
+      // --- DEBUGGING LOGS END ---
+
+      if (!fileName.endsWith('.mdx')) {
+        return null; // 明确跳过非 .mdx 文件
+      }
+      
+      // 从文件名中获取 slug，这是 slug 的唯一可靠来源
       const slug = fileName.replace(/\.mdx$/, '');
 
+      // --- DEBUGGING LOGS START ---
+      console.log('[DEBUG] Generated slug:', slug);
+      if (!slug) {
+        console.error('[ERROR] Slug is empty or undefined for file:', fileName);
+      }
+      // --- DEBUGGING LOGS END ---
+
+      // 读取 markdown 文件内容
       const fullPath = path.join(toolsDirectory, fileName);
       const fileContents = fs.readFileSync(fullPath, 'utf8');
+
+      // 使用 gray-matter 解析 frontmatter
       const matterResult = matter(fileContents);
 
-      // 3. The slug from the filename is the single source of truth
+      // 将 frontmatter 数据与从文件名派生的 slug 结合
+      // 确保 filename-derived slug 总是覆盖 frontmatter 中的 slug（如果存在）
       return {
-        ...matterResult.data,
-        slug,
+        ...matterResult.data, // 展开 frontmatter 中的所有数据
+        slug,                 // 用文件名派生的 slug 覆盖或添加 slug 属性
       } as ToolData;
-    });
+    })
+    .filter(Boolean as any as (value: ToolData | null) => value is ToolData); // 过滤掉 null 值
+
 
   // Sort tools by name
   return allToolsData.sort((a, b) => {
