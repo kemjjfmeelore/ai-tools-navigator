@@ -58,6 +58,6 @@ export async function getToolData(slug: string): Promise<ToolData & { content: s
   return {
     slug,
     content: matterResult.content,
-    ...(matterResult.data as Omit<ToolData, 'slug'>),
-  };
+    ...matterResult.data,
+  } as ToolData & { content: string };
 }
