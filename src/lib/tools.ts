@@ -47,7 +47,7 @@ export function getSortedToolsData(): ToolData[] {
   });
 }
 
-export async function getToolData(slug: string) {
+export async function getToolData(slug: string): Promise<ToolData & { content: string }> {
   const fullPath = path.join(toolsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
 
