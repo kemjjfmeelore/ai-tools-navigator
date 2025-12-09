@@ -55,22 +55,17 @@ export function getSortedToolsData(): ToolData[] {
     .filter(Boolean as any as (value: ToolData | null) => value is ToolData); // 过滤掉 null 值
 
 
-  // Sort tools by name
-  return allToolsData.sort((a, b) => {
-    // A quick check to prevent error if name is missing in frontmatter
-    if (!a.name || !b.name) return 0;
-    
-    if (a.name < b.name) {
-      return -1;
-    } else {
-      return 1;
-    }
-  });
+  return allToolsData;
 }
 
 export async function getToolData(
   slug: string
 ): Promise<ToolData & { content: string }> {
+  // Add a guard clause to catch invalid slug calls immediately
+  if (typeof slug !== 'string' || !slug) {
+    throw new Error(`CRITICAL: getToolData was called with an invalid slug: ${slug}`);
+  }
+
   const fullPath = path.join(toolsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
 
